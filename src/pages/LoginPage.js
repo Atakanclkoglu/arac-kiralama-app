@@ -69,7 +69,7 @@ function LoginPage({ setIsLoggedIn }) {
         fullWidth
         onClick={handleLogin}
       >
-        Giriş Yap!!!!!
+        Giriş Yap - Login
       </Button>
 
       <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
