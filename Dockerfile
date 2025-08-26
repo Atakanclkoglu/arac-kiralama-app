@@ -1,5 +1,5 @@
 # Aşama 1: Uygulamayı build etmek için node ortamı
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Çalışma dizinini ayarla
 WORKDIR /app
@@ -14,6 +14,9 @@ RUN npm run build
 
 # Aşama 2: Uygulamayı sunmak için hafif bir Nginx imajı
 FROM nginx:alpine
+
+# Nginx yapılandırma dosyasını kopyala (DOĞRU YERİ BURASI)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Çalışma dizinini ayarla
 WORKDIR /usr/share/nginx/html
