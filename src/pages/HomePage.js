@@ -6,36 +6,46 @@ import CarCard from '../components/CarCard';
 function HomePage() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   
-  // Sayfa yüklendiğinde tüm araçları getiren ilk useEffect
-  useEffect(() => {
-    const fetchAllCars = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get('http://localhost:8001/cars/');
-        setCars(response.data);
-      } catch (error) {
-        console.error("Araba verileri çekilirken bir hata oluştu:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAllCars();
-  }, []); // Bağımlılık dizisi boş olduğu için sadece sayfa ilk yüklendiğinde çalışır
-
-  // Arama butonu tıklandığında çalışacak fonksiyon
-  const handleSearch = async () => {
+  // Arama ve filtreleme state'leri
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  
+  // Bu fonksiyon, filtreleme değerlerine göre API'yi çağıracak
+  const fetchCars = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8001/cars/?q=${searchQuery}`);
+      let url = 'http://localhost:8001/cars/';
+      const params = new URLSearchParams();
+
+      if (searchQuery) {
+        params.append('car_name', searchQuery);
+      }
+      if (minPrice) {
+        params.append('min_price', minPrice);
+      }
+      if (maxPrice) {
+        params.append('max_price', maxPrice);
+      }
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await axios.get(url);
       setCars(response.data);
     } catch (error) {
-      console.error("Arama yapılırken bir hata oluştu:", error);
+      console.error("Araba verileri çekilirken bir hata oluştu:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Sayfa ilk yüklendiğinde tüm araçları getiren useEffect
+  useEffect(() => {
+    fetchCars();
+  }, []); // Bağımlılık dizisi boş olduğu için sadece sayfa ilk yüklendiğinde çalışır
 
   if (loading) {
     return (
@@ -53,26 +63,36 @@ function HomePage() {
         Kiralanabilir Araçlar
       </Typography>
       
-      {/* Arama çubuğu ve butonu */}
-      <Box sx={{ mb: 4, display: 'flex', gap: 2 }}>
+      <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <TextField
           fullWidth
           label="Araç Ara (Marka, Model, Motor Tipi...)"
           variant="outlined"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSearch();
-            }
-          }}
+        />
+        <TextField
+          label="Min. Fiyat"
+          variant="outlined"
+          type="number"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+          sx={{ flexGrow: 1 }}
+        />
+        <TextField
+          label="Max. Fiyat"
+          variant="outlined"
+          type="number"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          sx={{ flexGrow: 1 }}
         />
         <Button 
           variant="contained" 
           color="primary" 
-          onClick={handleSearch}
+          onClick={fetchCars}
         >
-          Ara
+          Ara & Filtrele
         </Button>
       </Box>
 
