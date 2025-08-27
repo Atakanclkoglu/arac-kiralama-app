@@ -1,5 +1,6 @@
 // src/components/CarCard.js
 import { Box, Button, Card, CardContent, CardMedia, Typography } from '@mui/material';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 function CarCard({ car }) {
@@ -58,4 +59,4 @@ function CarCard({ car }) {
     );
 }
 
-export default CarCard;
+export default React.memo(CarCard);

@@ -11,7 +11,7 @@ function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  
+
   // Bu fonksiyon, filtreleme değerlerine göre API'yi çağıracak
   const fetchCars = async () => {
     setLoading(true);
