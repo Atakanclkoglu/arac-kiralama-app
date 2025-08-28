@@ -42,7 +42,7 @@ function ReservationPage() {
     };
 
     try {
-      const response = await fetch('http://localhost:8002/calculate-price', {
+      const response = await fetch('http://localhost:8002/api/v1/booking/reserve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
