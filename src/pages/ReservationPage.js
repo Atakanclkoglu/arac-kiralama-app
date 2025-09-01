@@ -5,10 +5,18 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom'; // <-- BURAYA EKLE
 
 function ReservationPage() {
   const { carId } = useParams();
+  const navigate = useNavigate(); // <-- FONKSİYONUN BAŞINA EKLE
+
+  // Giriş kontrolü için useEffect
+  useEffect(() => {
+    if (!localStorage.getItem('access')) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   // State'leri tanımla
   const [startDate, setStartDate] = useState(null);
@@ -42,7 +50,7 @@ function ReservationPage() {
     };
 
     try {
-      const response = await fetch('http://localhost:8002/api/v1/booking/reserve', {
+      const response = await fetch('http://localhost:8002/api/v1/booking/calculate-price/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,10 +78,42 @@ function ReservationPage() {
   };
 
   // Onayla butonuna basıldığında çalışacak fonksiyon
-  const handleCompleteReservation = () => {
-    // Rezervasyonu tamamlama mantığı buraya eklenecek
-    alert(`Rezervasyonunuz onaylandı! Toplam fiyat: ${totalPrice} TL`);
-    // Kullanıcıyı ödeme sayfasına yönlendirebilir veya yeni bir API isteği atabilirsiniz.
+  const handleCompleteReservation = async () => {
+    setLoading(true);
+    setError(null);
+
+    const reservationData = {
+      car_id: parseInt(carId),
+      start_date: dayjs(startDate).format('YYYY-MM-DD'),
+      end_date: dayjs(endDate).format('YYYY-MM-DD'),
+      total_price: totalPrice,
+    };
+
+    // JWT token'ı localStorage'dan al
+    const token = localStorage.getItem('access');
+
+    try {
+      const response = await fetch('http://localhost:8002/api/v1/booking/reservations/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(reservationData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Rezervasyon kaydedilemedi.');
+      }
+
+      alert('Rezervasyon talebiniz alındı , sonucu birazdan göreceksiniz!');
+      // İstersen burada başka bir sayfaya yönlendirebilirsin
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
